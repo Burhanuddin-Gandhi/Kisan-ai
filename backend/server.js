@@ -67,7 +67,7 @@ app.post("/predict", upload.single("image"), async (req, res) => {
       throw new Error("GEMINI_API_KEY is not defined in backend environments.");
     }
 
-    const model = "gemini-1.5-flash";
+    const model = "gemini-2.5-flash";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
 
     const promptText = "You are an expert plant pathologist. Analyze this leaf or plant image. " +
