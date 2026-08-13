@@ -17,15 +17,16 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Make sure uploads directory exists programmatically
-if (!fs.existsSync("uploads")) {
-  fs.mkdirSync("uploads");
+const uploadsDir = path.join(__dirname, "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
 }
 
 // Middleware
 app.use(cors());
 
 app.use(express.json());
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+app.use("/uploads", express.static(uploadsDir));
 
 // MongoDB Connection
 mongoose
@@ -38,7 +39,7 @@ app.use("/api/auth", authRoutes);   // now login/register handled in auth.js
 
 // Multer Setup (still needed for predict)
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, "uploads/"),
+  destination: (req, file, cb) => cb(null, uploadsDir),
   filename: (req, file, cb) => cb(null, Date.now() + "-" + file.originalname),
 });
 app.get("/", (req, res) => {
