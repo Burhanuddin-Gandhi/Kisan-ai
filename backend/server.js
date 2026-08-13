@@ -58,7 +58,10 @@ app.post("/predict", upload.single("image"), async (req, res) => {
     const fileBuffer = fs.readFileSync(req.file.path);
     const base64Image = fileBuffer.toString("base64");
 
-    const geminiApiKey = process.env.GEMINI_API_KEY;
+    // Clean and trim api key to remove whitespace or accidental outer quotes
+    const rawKey = process.env.GEMINI_API_KEY;
+    const geminiApiKey = rawKey ? rawKey.trim().replace(/^["']|["']$/g, "") : null;
+
     if (!geminiApiKey) {
       throw new Error("GEMINI_API_KEY is not defined in backend environments.");
     }
@@ -75,6 +78,7 @@ app.post("/predict", upload.single("image"), async (req, res) => {
       "Format your output strictly as a JSON object with keys: 'name', 'description', 'remedy', 'severity'. " +
       "Do not include any markdown styling like ```json or ``` in the response. Just return the raw JSON object.";
 
+    console.log("📡 Sending request to Google Gemini API...");
     const response = await fetch(url, {
       method: "POST",
       headers: {
@@ -102,6 +106,7 @@ app.post("/predict", upload.single("image"), async (req, res) => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
+      console.error("❌ Google Gemini API Request Failed. Payload:", JSON.stringify(errorData));
       throw new Error(errorData.error?.message || `Gemini API failed with status ${response.status}`);
     }
 
@@ -111,7 +116,14 @@ app.post("/predict", upload.single("image"), async (req, res) => {
       throw new Error("No response received from Gemini.");
     }
 
-    const analysisResult = JSON.parse(textResponse.trim());
+    console.log("✅ Gemini Response parsed. Decoding JSON payload...");
+    let analysisResult;
+    try {
+      analysisResult = JSON.parse(textResponse.trim());
+    } catch (parseErr) {
+      console.error("❌ Failed to parse Gemini response as JSON. Raw text:", textResponse);
+      throw new Error("Google returned invalid response format. Please try again.");
+    }
 
     res.json({
       msg: "✅ Image analyzed successfully",
@@ -125,7 +137,7 @@ app.post("/predict", upload.single("image"), async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
+    console.error("❌ Error during predict route execution:", err);
     res.status(500).json({ msg: err.message || "Server error during diagnosis" });
   }
 });

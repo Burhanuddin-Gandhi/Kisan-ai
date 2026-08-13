@@ -716,7 +716,15 @@ function Yield({ crop }) {
 
 function MarketPrices({ crop, t }) {
   const [selectedCrop, setSelectedCrop] = useState(crop);
+  const [regionInput, setRegionInput] = useState("Rajkot");
   const [region, setRegion] = useState("Rajkot");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setRegion(regionInput);
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [regionInput]);
 
   const priceSeries = useMemo(() => {
     const seed = (selectedCrop.length + region.length) * 100;
@@ -748,7 +756,7 @@ function MarketPrices({ crop, t }) {
             </select>
           </label>
           <label className="flex items-center gap-2">Region
-            <input className="border rounded-xl px-2 py-1 ml-2" value={region} onChange={(e)=>setRegion(e.target.value)} />
+            <input className="border rounded-xl px-2 py-1 ml-2" value={regionInput} onChange={(e)=>setRegionInput(e.target.value)} />
           </label>
         </div>
         <div className="h-80">
