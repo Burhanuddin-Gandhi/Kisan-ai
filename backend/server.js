@@ -98,9 +98,6 @@ app.post("/predict", upload.single("image"), async (req, res) => {
             ],
           },
         ],
-        generationConfig: {
-          responseMimeType: "application/json",
-        },
       }),
     });
 
@@ -119,7 +116,12 @@ app.post("/predict", upload.single("image"), async (req, res) => {
     console.log("✅ Gemini Response parsed. Decoding JSON payload...");
     let analysisResult;
     try {
-      analysisResult = JSON.parse(textResponse.trim());
+      // Strip markdown code block wrappers if present (e.g. ```json ... ```)
+      let cleanedText = textResponse.trim();
+      if (cleanedText.startsWith("```")) {
+        cleanedText = cleanedText.replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+      }
+      analysisResult = JSON.parse(cleanedText);
     } catch (parseErr) {
       console.error("❌ Failed to parse Gemini response as JSON. Raw text:", textResponse);
       throw new Error("Google returned invalid response format. Please try again.");

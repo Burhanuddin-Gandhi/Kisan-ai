@@ -250,6 +250,7 @@ const translations = {
     potato: "Potato",
     hectares: "Hectares",
     acres: "Acres",
+    weather: "Weather",
   },
   "हिंदी": {
     dashboard: "डैशबोर्ड",
@@ -283,6 +284,7 @@ const translations = {
     potato: "आलू",
     hectares: "हेक्टेयर",
     acres: "एकड़",
+    weather: "मौसम",
   },
   "ગુજરાતી": {
     dashboard: "ડેશબોર્ડ",
@@ -316,6 +318,7 @@ const translations = {
     potato: "બટાકા",
     hectares: "હેક્ટર",
     acres: "એકર",
+    weather: "હવામાન",
   }
 };
 
@@ -337,7 +340,7 @@ export default function App() {
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <aside className="lg:w-64">
             <ProfileCard profile={profile} t={t} />
-            <SettingsPanel language={language} setLanguage={setLanguage} unit={unit} setUnit={setUnit} t={t} />
+            <SettingsPanel language={language} setLanguage={setLanguage} unit={unit} setUnit={setUnit} profile={profile} setProfile={setProfile} t={t} />
             <NotificationsPanel t={t} />
           </aside>
           <main className="flex-1">
@@ -417,7 +420,7 @@ function ProfileCard({ profile, t }) {
   );
 }
 
-function SettingsPanel({ language, setLanguage, unit, setUnit, t }) {
+function SettingsPanel({ language, setLanguage, unit, setUnit, profile, setProfile, t }) {
   return (
     <Card className="mt-4">
       <SectionTitle icon={SettingsIcon} title={t("quickSettings")} />
@@ -436,6 +439,15 @@ function SettingsPanel({ language, setLanguage, unit, setUnit, t }) {
             <option value="ha">{t("hectares")}</option>
             <option value="ac">{t("acres")}</option>
           </select>
+        </div>
+        <div className="border-t pt-3 mt-3">
+          <label className="block text-xs font-semibold text-gray-500 mb-1">{t("location") ? t("location").toUpperCase() : "LOCATION"}</label>
+          <input
+            type="text"
+            className="w-full border rounded-xl px-3 py-1.5 text-xs bg-gray-50 focus:bg-white text-gray-900 border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+            value={profile.location}
+            onChange={e=>setProfile({ ...profile, location: e.target.value })}
+          />
         </div>
       </div>
     </Card>
@@ -465,6 +477,16 @@ function NotificationsPanel({ t }) {
 
 // ---- Pages ----
 function Dashboard({ profile, unit, t }) {
+  const weatherData = useMemo(() => {
+    const seed = profile.location.length;
+    const baseTemp = 30 + (seed % 6);
+    return [
+      { d: "Mon", t: `${baseTemp}°/${baseTemp - 8}°`, r: `${30 + (seed * 2) % 50}%` },
+      { d: "Tue", t: `${baseTemp - 1}°/${baseTemp - 9}°`, r: `${40 + (seed * 3) % 50}%` },
+      { d: "Wed", t: `${baseTemp - 2}°/${baseTemp - 9}°`, r: `${35 + (seed * 4) % 50}%` }
+    ];
+  }, [profile.location]);
+
   return (
     <div>
       <div className="grid md:grid-cols-3 gap-4">
@@ -527,9 +549,9 @@ function Dashboard({ profile, unit, t }) {
           </div>
         </Card>
         <Card>
-          <SectionTitle icon={CloudRain} title={t("knowledge")} subtitle="Rajkot, next 3 days (demo)" />
+          <SectionTitle icon={CloudRain} title={t("weather") || "Weather"} subtitle={`${profile.location}, next 3 days`} />
           <div className="grid grid-cols-3 gap-3 text-sm">
-            {[{d:"Mon", t:"34°/26°", r:"40%"},{d:"Tue", t:"33°/25°", r:"70%"},{d:"Wed", t:"32°/25°", r:"60%"}].map((w, i)=> (
+            {weatherData.map((w, i)=> (
               <div key={i} className="rounded-xl bg-[#F6AD55] text-[#3D2A10] border border-amber-300 p-3">
                 <div className="font-medium text-gray-700">{w.d}</div>
                 <div className="text-2xl font-semibold">{w.t}</div>
