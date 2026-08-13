@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 import cors from "cors";
 import multer from "multer";
 import path from "path";
+import fs from "fs";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
 import authRoutes from "../routes/auth.js";   // ✅ only auth routes imported
@@ -62,20 +63,86 @@ app.get("/", (req, res) => {
 });
 const upload = multer({ storage });
 
-// Example predict endpoint (keep this for later)
+// Gemini API call from backend
 app.post("/predict", upload.single("image"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ msg: "No image uploaded" });
 
     const imagePath = `/uploads/${req.file.filename}`;
 
+    // Read file and convert to base64
+    const fileBuffer = fs.readFileSync(req.file.path);
+    const base64Image = fileBuffer.toString("base64");
+
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (!geminiApiKey) {
+      throw new Error("GEMINI_API_KEY is not defined in backend environments.");
+    }
+
+    const model = "gemini-1.5-flash";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
+
+    const promptText = "You are an expert plant pathologist. Analyze this leaf or plant image. " +
+      "If a disease is detected, identify it and provide: " +
+      "1. name: The name of the disease (or 'Healthy' if no disease is detected). " +
+      "2. description: A brief explanation of what the disease is, what causes it, and how it affects the plant. " +
+      "3. remedy: Clear, actionable steps to treat or manage the disease. " +
+      "4. severity: The severity level ('Low', 'Medium', 'High', or 'None' if healthy). " +
+      "Format your output strictly as a JSON object with keys: 'name', 'description', 'remedy', 'severity'. " +
+      "Do not include any markdown styling like ```json or ``` in the response. Just return the raw JSON object.";
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              { text: promptText },
+              {
+                inlineData: {
+                  data: base64Image,
+                  mimeType: req.file.mimetype,
+                },
+              },
+            ],
+          },
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+        },
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      throw new Error(errorData.error?.message || `Gemini API failed with status ${response.status}`);
+    }
+
+    const data = await response.json();
+    const textResponse = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!textResponse) {
+      throw new Error("No response received from Gemini.");
+    }
+
+    const analysisResult = JSON.parse(textResponse.trim());
+
     res.json({
-      msg: "✅ Image uploaded successfully",
+      msg: "✅ Image analyzed successfully",
       imageUrl: imagePath,
+      data: {
+        plant: req.body.plant || "Unknown",
+        disease: analysisResult.name,
+        solution: analysisResult.remedy,
+        severity: analysisResult.severity,
+        imageUrl: imagePath,
+      },
     });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ msg: "Server error" });
+    res.status(500).json({ msg: err.message || "Server error during diagnosis" });
   }
 });
 

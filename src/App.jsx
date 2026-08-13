@@ -180,6 +180,8 @@ function Home() {
 
 
 
+
+
 // ---- Placeholder AI/Logic Functions (replace with real APIs) ----
 function predictDiseaseMock(file) {
   // Very naive mock – swap for real model call
@@ -441,11 +443,13 @@ function CropHealth() {
   const [imgUrl, setImgUrl] = useState("");
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const onFile = (f) => {
     if (!f) return;
     setFile(f);
     setResult(null);
+    setError("");
     const url = URL.createObjectURL(f);
     setImgUrl(url);
   };
@@ -453,14 +457,47 @@ function CropHealth() {
   const analyze = async () => {
     if (!file) return;
     setLoading(true);
-    const res = await predictDiseaseMock(file); // TODO: swap with real model API
-    setResult(res);
-    setLoading(false);
+    setError("");
+    try {
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("plant", "Crop"); // default plant parameter
+
+      const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/predict`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.msg || `Server returned status ${res.status}`);
+      }
+
+      const responseData = await res.json();
+      setResult({
+        name: responseData.data.disease,
+        remedy: responseData.data.solution,
+        severity: responseData.data.severity,
+        imageUrl: responseData.data.imageUrl,
+      });
+    } catch (err) {
+      console.error(err);
+      setError(err.message || "An error occurred during diagnosis.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div>
       <SectionTitle icon={Leaf} title="AI Doctor for Crops" subtitle="Upload a leaf/plant photo for instant analysis" />
+
+      {error && (
+        <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-3 text-sm font-medium">
+          ⚠️ {error}
+        </div>
+      )}
+
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <div className="border-2 border-dashed rounded-2xl p-6 text-center">
