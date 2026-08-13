@@ -70,6 +70,8 @@ app.post("/predict", upload.single("image"), async (req, res) => {
     const model = "gemini-2.5-flash";
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${geminiApiKey}`;
 
+    const selectedLanguage = req.body.language || "English";
+
     const promptText = "You are an expert plant pathologist. Analyze this leaf or plant image. " +
       "If a disease is detected, identify it and provide: " +
       "1. name: The name of the disease (or 'Healthy' if no disease is detected). " +
@@ -77,6 +79,7 @@ app.post("/predict", upload.single("image"), async (req, res) => {
       "3. remedy: Clear, actionable steps to treat or manage the disease. " +
       "4. severity: The severity level ('Low', 'Medium', 'High', or 'None' if healthy). " +
       "Format your output strictly as a JSON object with keys: 'name', 'description', 'remedy', 'severity'. " +
+      "Translate the values of all fields (except the severity value) into " + selectedLanguage + ". " +
       "Do not include any markdown styling like ```json or ``` in the response. Just return the raw JSON object.";
 
     console.log("📡 Sending request to Google Gemini API...");

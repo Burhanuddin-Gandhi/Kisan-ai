@@ -345,7 +345,7 @@ export default function App() {
           </aside>
           <main className="flex-1">
             {active === "Dashboard" && <Dashboard profile={profile} unit={unit} t={t} />}
-            {active === "Crop Health" && <CropHealth t={t} />}
+            {active === "Crop Health" && <CropHealth language={language} t={t} />}
             {active === "Irrigation" && <Irrigation unit={unit} t={t} />}
             {active === "Yield" && <Yield crop={profile.crop} t={t} />}
             {active === "Market" && <MarketPrices crop={profile.crop} t={t} />}
@@ -565,7 +565,7 @@ function Dashboard({ profile, unit, t }) {
   );
 }
 
-function CropHealth({ t }) {
+function CropHealth({ language, t }) {
   const [file, setFile] = useState(null);
   const [imgUrl, setImgUrl] = useState("");
   const [result, setResult] = useState(null);
@@ -589,6 +589,7 @@ function CropHealth({ t }) {
       const formData = new FormData();
       formData.append("image", file);
       formData.append("plant", "Crop"); // default plant parameter
+      formData.append("language", language || "English");
 
       const res = await fetch(`${import.meta.env.VITE_API_URL || "http://localhost:5000"}/predict`, {
         method: "POST",
