@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import dotenv from "dotenv";
 import { fileURLToPath } from "url";
-import authRoutes from "../routes/auth.js";   // ✅ only auth routes imported
+import authRoutes from "../routes/auth.js";   // only auth routes imported
 
 dotenv.config();
 
@@ -19,16 +19,16 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 // Define the list of allowed origins (guests)
 const allowedOrigins = [
-  'http://localhost:5173', // Your local frontend URL
+  'http://localhost:5173', // Local Frontend
   'http://localhost:3000', // Alternate local port
   process.env.FRONTEND_URL, // Deployed frontend URL
-  /https:\/\/musical-xylophone-.*\.app\.github\.dev/ // The Codespaces URL pattern
+  /https:\/\/musical-xylophone-.*\.app\.github\.dev/ // 
 ].filter(Boolean);
 
 // This is the new, more flexible CORS configuration
 app.use(cors({
   origin: function (origin, callback) {
-    // Allow requests with no origin (like mobile apps or curl requests)
+    // Allow requests with no origin (
     if (!origin) return callback(null, true);
 
     // Check if the incoming origin is on our allowed list
@@ -50,7 +50,7 @@ mongoose
   .catch((err) => console.log("❌ MongoDB error:", err));
 
 // Use Routes
-app.use("/api/auth", authRoutes);   // ✅ now login/register handled in auth.js
+app.use("/api/auth", authRoutes);   // now login/register handled in auth.js
 
 // Multer Setup (still needed for predict)
 const storage = multer.diskStorage({
