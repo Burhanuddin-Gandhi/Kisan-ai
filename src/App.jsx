@@ -216,6 +216,109 @@ function forecastYieldMock(crop) {
   return sampleYieldSeries.map(p => ({ ...p }));
 }
 
+// ---- Translation System ----
+const translations = {
+  English: {
+    dashboard: "Dashboard",
+    cropHealth: "Crop Health",
+    irrigation: "Irrigation",
+    yield: "Yield",
+    market: "Market",
+    optimizer: "Optimizer",
+    knowledge: "Knowledge Hub",
+    login: "Login",
+    quickSettings: "Quick Settings",
+    language: "Language",
+    units: "Units",
+    alerts: "Alerts",
+    welcome: "Welcome back",
+    farmer: "Farmer",
+    location: "Rajkot, Gujarat",
+    crop: "Crop",
+    analyzeImage: "Analyze Image",
+    uploadPrompt: "Upload a leaf/plant photo for instant analysis",
+    dropPrompt: "Drop an image here",
+    browsePrompt: "or click to browse",
+    resultPrompt: "Result will appear here…",
+    doctor: "AI Doctor for Crops",
+    analyzing: "Analyzing…",
+    wheat: "Wheat",
+    rice: "Rice",
+    maize: "Maize",
+    cotton: "Cotton",
+    tomato: "Tomato",
+    potato: "Potato",
+    hectares: "Hectares",
+    acres: "Acres",
+  },
+  "हिंदी": {
+    dashboard: "डैशबोर्ड",
+    cropHealth: "फसल स्वास्थ्य",
+    irrigation: "सिंचाई",
+    yield: "पैदावार",
+    market: "बाज़ार",
+    optimizer: "अनुकूलक",
+    knowledge: "ज्ञान केंद्र",
+    login: "लॉगिन",
+    quickSettings: "त्वरित सेटिंग्स",
+    language: "भाषा",
+    units: "इकाइयाँ",
+    alerts: "अलर्ट",
+    welcome: "स्वागत है",
+    farmer: "किसान",
+    location: "राजकोट, गुजरात",
+    crop: "फसल",
+    analyzeImage: "छवि का विश्लेषण करें",
+    uploadPrompt: "त्वरित विश्लेषण के लिए एक पत्ता/पौधा फोटो अपलोड करें",
+    dropPrompt: "यहाँ एक छवि छोड़ें",
+    browsePrompt: "या ब्राउज़ करने के लिए क्लिक करें",
+    resultPrompt: "परिणाम यहाँ दिखाई देगा...",
+    doctor: "फसलों के लिए एआई डॉक्टर",
+    analyzing: "विश्लेषण कर रहा है...",
+    wheat: "गेहूं",
+    rice: "चावल",
+    maize: "मक्का",
+    cotton: "कपास",
+    tomato: "टमाटर",
+    potato: "आलू",
+    hectares: "हेक्टेयर",
+    acres: "एकड़",
+  },
+  "ગુજરાતી": {
+    dashboard: "ડેશબોર્ડ",
+    cropHealth: "પાક આરોગ્ય",
+    irrigation: "સિંચાઈ",
+    yield: "ઉત્પાદન",
+    market: "બજાર",
+    optimizer: "ઓપ્ટિમાઇઝર",
+    knowledge: "જ્ઞાન કેન્દ્ર",
+    login: "લોગિન",
+    quickSettings: "ઝડપી સેટિંગ્સ",
+    language: "ભાષા",
+    units: "એકમો",
+    alerts: "ચેતવણીઓ",
+    welcome: "સ્વાગત છે",
+    farmer: "ખેડૂત",
+    location: "રાજકોટ, ગુજરાત",
+    crop: "પાક",
+    analyzeImage: "છબીનું વિશ્લેષણ કરો",
+    uploadPrompt: "ઝડપી વિશ્લેષણ માટે પાંદડા/છોડનો ફોટો અપલોડ કરો",
+    dropPrompt: "અહીં છબી મૂકો",
+    browsePrompt: "અથવા બ્રાઉઝ કરવા માટે ક્લિક કરો",
+    resultPrompt: "પરિણામ અહીં દેખાશે...",
+    doctor: "પાક માટે એઆઈ ડોક્ટર",
+    analyzing: "વિશ્લેષણ કરી રહ્યું છે...",
+    wheat: "ઘઉં",
+    rice: "ચોખા",
+    maize: "મકાઈ",
+    cotton: "કપાસ",
+    tomato: "ટામેટા",
+    potato: "બટાકા",
+    hectares: "હેક્ટર",
+    acres: "એકર",
+  }
+};
+
 // ---- Main App ----
 export default function App() {
   const [active, setActive] = useState("Dashboard");
@@ -223,26 +326,29 @@ export default function App() {
   const [unit, setUnit] = useState("ha");
   const [profile, setProfile] = useState({ name: "Farmer", location: "Rajkot, Gujarat", crop: "Wheat" });
 
+  const t = (key) => {
+    return translations[language]?.[key] || translations["English"]?.[key] || key;
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F7FAFC] to-white">
-      <TopNav active={active} onChange={setActive} />
+      <TopNav active={active} onChange={setActive} t={t} />
       <div className="max-w-7xl mx-auto px-4 pb-12">
         <div className="flex flex-col lg:flex-row gap-6 mt-6">
           <aside className="lg:w-64">
-            <ProfileCard profile={profile} />
-            <SettingsPanel language={language} setLanguage={setLanguage} unit={unit} setUnit={setUnit} />
-            <NotificationsPanel />
+            <ProfileCard profile={profile} t={t} />
+            <SettingsPanel language={language} setLanguage={setLanguage} unit={unit} setUnit={setUnit} t={t} />
+            <NotificationsPanel t={t} />
           </aside>
           <main className="flex-1">
-            {active === "Dashboard" && <Dashboard profile={profile} unit={unit} />}
-            {active === "Crop Health" && <CropHealth />}
-            {active === "Irrigation" && <Irrigation unit={unit} />}
-            {active === "Yield" && <Yield crop={profile.crop} />}
-            {active === "Market" && <MarketPrices crop={profile.crop} />}
-            {active === "Optimizer" && <Optimizer unit={unit} />}
-            {active === "Knowledge" && <KnowledgeHub crop={profile.crop} />}
-            {active === "Chatbot" && <Chatbot />}
-            {active === "Login" && <AuthDemo />}
+            {active === "Dashboard" && <Dashboard profile={profile} unit={unit} t={t} />}
+            {active === "Crop Health" && <CropHealth t={t} />}
+            {active === "Irrigation" && <Irrigation unit={unit} t={t} />}
+            {active === "Yield" && <Yield crop={profile.crop} t={t} />}
+            {active === "Market" && <MarketPrices crop={profile.crop} t={t} />}
+            {active === "Optimizer" && <Optimizer unit={unit} t={t} />}
+            {active === "Knowledge" && <KnowledgeHub crop={profile.crop} t={t} />}
+            {active === "Login" && <AuthDemo t={t} />}
           </main>
         </div>
       </div>
@@ -251,17 +357,16 @@ export default function App() {
 }
 
 // ---- Top Navigation ----
-function TopNav({ active, onChange }) {
+function TopNav({ active, onChange, t }) {
   const tabs = [
-    { name: "Dashboard", icon: BarChart2 },
-    { name: "Crop Health", icon: Leaf },
-    { name: "Irrigation", icon: Droplets },
-    { name: "Yield", icon: LineChartIcon },
-    { name: "Market", icon: IndianRupee },
-    { name: "Optimizer", icon: Sprout },
-    { name: "Knowledge", icon: CloudRain },
-    { name: "Chatbot", icon: Mic },
-    { name: "Login", icon: SettingsIcon },
+    { name: "Dashboard", translationKey: "dashboard", icon: BarChart2 },
+    { name: "Crop Health", translationKey: "cropHealth", icon: Leaf },
+    { name: "Irrigation", translationKey: "irrigation", icon: Droplets },
+    { name: "Yield", translationKey: "yield", icon: LineChartIcon },
+    { name: "Market", translationKey: "market", icon: IndianRupee },
+    { name: "Optimizer", translationKey: "optimizer", icon: Sprout },
+    { name: "Knowledge", translationKey: "knowledge", icon: CloudRain },
+    { name: "Login", translationKey: "login", icon: SettingsIcon },
   ];
   return (
     <div className="sticky top-0 z-10 backdrop-blur bg-white/70 border-b border-gray-100">
@@ -274,7 +379,7 @@ function TopNav({ active, onChange }) {
           </div>
         </div>
         <nav className="hidden md:flex items-center gap-1">
-          {tabs.map(({ name, icon: Icon }) => (
+          {tabs.map(({ name, translationKey, icon: Icon }) => (
             <button
               key={name}
               onClick={() => onChange(name)}
@@ -284,7 +389,7 @@ function TopNav({ active, onChange }) {
                   : "text-gray-700 hover:bg-gray-100 hover:text-[#010302]"
               }`}
             >
-              <Icon size={16} /> {name}
+              <Icon size={16} /> {t(translationKey)}
             </button>
           ))}
         </nav>
@@ -294,31 +399,31 @@ function TopNav({ active, onChange }) {
 }
 
 // ---- Sidebar Panels ----
-function ProfileCard({ profile }) {
+function ProfileCard({ profile, t }) {
   return (
     <Card className="">
       <div className="flex items-center gap-3">
         <div className="w-12 h-12 rounded-xl bg-[#2F855A] text-white flex items-center justify-center font-semibold">{profile.name[0]}</div>
         <div>
           <div className="font-semibold text-gray-900">{profile.name}</div>
-          <div className="text-sm text-gray-500">{profile.location}</div>
+          <div className="text-sm text-gray-500">{t("location")}</div>
         </div>
       </div>
       <div className="mt-4 flex items-center gap-2 text-sm">
-        <Pill><Leaf size={14}/> {profile.crop}</Pill>
+        <Pill><Leaf size={14}/> {t(profile.crop.toLowerCase())}</Pill>
         <Pill color="bg-[#F6AD55] text-[#3D2A10]"><CloudRain size={14}/> Monsoon</Pill>
       </div>
     </Card>
   );
 }
 
-function SettingsPanel({ language, setLanguage, unit, setUnit }) {
+function SettingsPanel({ language, setLanguage, unit, setUnit, t }) {
   return (
     <Card className="mt-4">
-      <SectionTitle icon={SettingsIcon} title="Quick Settings" />
+      <SectionTitle icon={SettingsIcon} title={t("quickSettings")} />
       <div className="space-y-3 text-sm">
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Language</span>
+          <span className="text-gray-600">{t("language")}</span>
           <select className="border rounded-lg px-2 py-1" value={language} onChange={e=>setLanguage(e.target.value)}>
             <option>English</option>
             <option>हिंदी</option>
@@ -326,10 +431,10 @@ function SettingsPanel({ language, setLanguage, unit, setUnit }) {
           </select>
         </div>
         <div className="flex items-center justify-between">
-          <span className="text-gray-600">Units</span>
+          <span className="text-gray-600">{t("units")}</span>
           <select className="border rounded-lg px-2 py-1" value={unit} onChange={e=>setUnit(e.target.value)}>
-            <option value="ha">Hectares</option>
-            <option value="ac">Acres</option>
+            <option value="ha">{t("hectares")}</option>
+            <option value="ac">{t("acres")}</option>
           </select>
         </div>
       </div>
@@ -337,7 +442,7 @@ function SettingsPanel({ language, setLanguage, unit, setUnit }) {
   );
 }
 
-function NotificationsPanel() {
+function NotificationsPanel({ t }) {
   const alerts = [
     { label: "Pest risk in your area", type: "warning" },
     { label: "Rain expected tomorrow", type: "info" },
@@ -345,7 +450,7 @@ function NotificationsPanel() {
   ];
   return (
     <Card className="mt-4">
-      <SectionTitle icon={Bell} title="Alerts" subtitle="Recent updates" />
+      <SectionTitle icon={Bell} title={t("alerts")} subtitle="Recent updates" />
       <div className="space-y-2">
         {alerts.map((a, i) => (
           <div key={i} className="flex items-center gap-2 text-sm">
@@ -359,13 +464,13 @@ function NotificationsPanel() {
 }
 
 // ---- Pages ----
-function Dashboard({ profile, unit }) {
+function Dashboard({ profile, unit, t }) {
   return (
     <div>
       <div className="grid md:grid-cols-3 gap-4">
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.05 }}>
           <Card>
-            <SectionTitle icon={Leaf} title="Crop Health" subtitle="AI scan status" />
+            <SectionTitle icon={Leaf} title={t("cropHealth")} subtitle="AI scan status" />
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-[#22543D] font-semibold">Healthy</div>
@@ -377,7 +482,7 @@ function Dashboard({ profile, unit }) {
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
           <Card>
-            <SectionTitle icon={Droplets} title="Irrigation" subtitle="Today" />
+            <SectionTitle icon={Droplets} title={t("irrigation")} subtitle="Today" />
             <div className="flex items-center justify-between">
               <div>
                 <div className="font-semibold">No watering needed</div>
@@ -389,7 +494,7 @@ function Dashboard({ profile, unit }) {
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}>
           <Card>
-            <SectionTitle icon={LineChartIcon} title="Yield Forecast" subtitle={profile.crop} />
+            <SectionTitle icon={LineChartIcon} title={t("yield") + " Forecast"} subtitle={t(profile.crop.toLowerCase())} />
             <div className="h-28">
               <ResponsiveContainer width="100%" height="100%">
                 <RLineChart data={sampleYieldSeries} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
@@ -408,7 +513,7 @@ function Dashboard({ profile, unit }) {
 
       <div className="grid md:grid-cols-2 gap-4 mt-4">
         <Card>
-          <SectionTitle icon={IndianRupee} title="Market Prices" subtitle="12‑month trend" />
+          <SectionTitle icon={IndianRupee} title={t("market") + " Prices"} subtitle="12‑month trend" />
           <div className="h-60">
             <ResponsiveContainer width="100%" height="100%">
               <RLineChart data={samplePriceSeries} margin={{ top: 10, right: 8, left: -18, bottom: 0 }}>
@@ -422,7 +527,7 @@ function Dashboard({ profile, unit }) {
           </div>
         </Card>
         <Card>
-          <SectionTitle icon={CloudRain} title="Weather" subtitle="Rajkot, next 3 days (demo)" />
+          <SectionTitle icon={CloudRain} title={t("knowledge")} subtitle="Rajkot, next 3 days (demo)" />
           <div className="grid grid-cols-3 gap-3 text-sm">
             {[{d:"Mon", t:"34°/26°", r:"40%"},{d:"Tue", t:"33°/25°", r:"70%"},{d:"Wed", t:"32°/25°", r:"60%"}].map((w, i)=> (
               <div key={i} className="rounded-xl bg-[#F6AD55] text-[#3D2A10] border border-amber-300 p-3">
@@ -438,7 +543,7 @@ function Dashboard({ profile, unit }) {
   );
 }
 
-function CropHealth() {
+function CropHealth({ t }) {
   const [file, setFile] = useState(null);
   const [imgUrl, setImgUrl] = useState("");
   const [result, setResult] = useState(null);
@@ -490,7 +595,7 @@ function CropHealth() {
 
   return (
     <div>
-      <SectionTitle icon={Leaf} title="AI Doctor for Crops" subtitle="Upload a leaf/plant photo for instant analysis" />
+      <SectionTitle icon={Leaf} title={t("doctor")} subtitle={t("uploadPrompt")} />
 
       {error && (
         <div className="mb-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl p-3 text-sm font-medium">
@@ -506,19 +611,19 @@ function CropHealth() {
             ) : (
               <div className="text-gray-500">
                 <div className="mx-auto w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center mb-2"><ImageIcon /></div>
-                <div className="font-medium">Drop an image here</div>
-                <div className="text-sm">or click to browse</div>
+                <div className="font-medium">{t("dropPrompt")}</div>
+                <div className="text-sm">{t("browsePrompt")}</div>
               </div>
             )}
             <input type="file" accept="image/*" className="mt-4" onChange={(e)=>onFile(e.target.files?.[0])} />
           </div>
           <button onClick={analyze} disabled={!file || loading} className="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl px-4 py-2 font-medium disabled:opacity-50">
-            {loading ? "Analyzing…" : "Analyze Image"}
+            {loading ? t("analyzing") : t("analyzeImage")}
           </button>
         </Card>
         <Card>
           <div className="min-h-64 flex flex-col justify-center items-start">
-            {!result && <div className="text-gray-500">Result will appear here…</div>}
+            {!result && <div className="text-gray-500">{t("resultPrompt")}</div>}
             {result && (
               <div className="space-y-3">
                 <Pill color={`${result.severity === "High" ? "bg-rose-100 text-rose-700" : result.severity === "Medium" ? "bg-amber-100 text-amber-700" : "bg-emerald-100 text-emerald-700"}`}>{result.severity || "Info"}</Pill>
@@ -609,15 +714,38 @@ function Yield({ crop }) {
   );
 }
 
-function MarketPrices({ crop }) {
+function MarketPrices({ crop, t }) {
+  const [selectedCrop, setSelectedCrop] = useState(crop);
   const [region, setRegion] = useState("Rajkot");
+
+  const priceSeries = useMemo(() => {
+    const seed = (selectedCrop.length + region.length) * 100;
+    return Array.from({ length: 12 }, (_, i) => {
+      const month = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][i];
+      const basePrices = {
+        Wheat: 2200,
+        Rice: 2000,
+        Maize: 1800,
+        Cotton: 6000,
+        Tomato: 1500,
+        Potato: 1200
+      };
+      const base = basePrices[selectedCrop] || 2000;
+      const regionOffset = (region.charCodeAt(0) || 0) * 5 - 300;
+      const price = base + regionOffset + Math.round(Math.sin(i/1.5) * 250) + Math.round(Math.sin((seed + i)/3.5) * 100);
+      return { month, price: Math.max(500, price) };
+    });
+  }, [selectedCrop, region]);
+
   return (
     <div>
-      <SectionTitle icon={IndianRupee} title="Market Prices & Trends" subtitle="Demo data – connect Agmarknet later" />
+      <SectionTitle icon={IndianRupee} title={t("market") + " Prices & Trends"} subtitle="Demo data – connect Agmarknet later" />
       <Card>
         <div className="flex flex-wrap gap-3 items-center text-sm mb-3">
           <label className="flex items-center gap-2">Crop
-            <select className="border rounded-xl px-2 py-1 ml-2">{crops.map(c=> <option key={c} selected={c===crop}>{c}</option>)}</select>
+            <select className="border rounded-xl px-2 py-1 ml-2" value={selectedCrop} onChange={(e)=>setSelectedCrop(e.target.value)}>
+              {crops.map(c=> <option key={c} value={c}>{c}</option>)}
+            </select>
           </label>
           <label className="flex items-center gap-2">Region
             <input className="border rounded-xl px-2 py-1 ml-2" value={region} onChange={(e)=>setRegion(e.target.value)} />
@@ -625,17 +753,17 @@ function MarketPrices({ crop }) {
         </div>
         <div className="h-80">
           <ResponsiveContainer width="100%" height="100%">
-            <RLineChart data={samplePriceSeries} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
+            <RLineChart data={priceSeries} margin={{ top: 10, right: 12, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="month" />
               <YAxis />
               <Tooltip />
-              <Line type="monotone" dataKey="price" />
+              <Line type="monotone" dataKey="price" stroke="#2F855A" strokeWidth={2} />
             </RLineChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-3 text-sm text-gray-700">
-          Best mandi nearby: <span className="font-medium">Rajkot APMC</span> • Average price last month: <span className="font-medium">₹{Math.round(samplePriceSeries.reduce((a,b)=>a+b.price,0)/samplePriceSeries.length)}</span>
+          Best mandi nearby: <span className="font-medium">{region} APMC</span> • Average price last month: <span className="font-medium">₹{Math.round(priceSeries.reduce((a,b)=>a+b.price,0)/priceSeries.length)}</span>
         </div>
       </Card>
     </div>
@@ -719,59 +847,7 @@ function KnowledgeHub({ crop }) {
   );
 }
 
-function Chatbot() {
-  const [messages, setMessages] = useState([{ from: "bot", text: "Namaste! Ask me about crops, irrigation, or prices." }]);
-  const [input, setInput] = useState("");
-  const recRef = useRef(null);
 
-  const send = (text) => {
-    if (!text.trim()) return;
-    const userMsg = { from: "user", text };
-    const reply = simpleReply(text);
-    setMessages((m) => [...m, userMsg, { from: "bot", text: reply }]);
-    setInput("");
-  };
-
-  const startMic = () => {
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (!SR) { alert("Speech Recognition not supported in this browser."); return; }
-    const rec = new SR();
-    rec.lang = "en-IN"; // TODO: switch based on selected language
-    rec.onresult = (e) => {
-      const text = e.results[0][0].transcript;
-      setInput(text);
-      send(text);
-    };
-    rec.start();
-    recRef.current = rec;
-  };
-
-  return (
-    <div>
-      <SectionTitle icon={Mic} title="Voice & Chat Assistant" subtitle="Type or use the mic (demo)" />
-      <Card>
-        <div className="h-72 overflow-y-auto space-y-2">
-          {messages.map((m, i) => (
-            <div key={i} className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${m.from === "user" ? "ml-auto bg-[#22543D] text-white" : "bg-gray-100 text-gray-800"}`}>{m.text}</div>
-          ))}
-        </div>
-        <div className="mt-3 flex items-center gap-2">
-          <input className="flex-1 border rounded-xl px-3 py-2" placeholder="Ask about irrigation…" value={input} onChange={(e)=>setInput(e.target.value)} onKeyDown={(e)=>{ if(e.key==='Enter') send(input) }} />
-          <button onClick={()=>send(input)} className="bg-[#22543D] hover:bg-[#1C4532] text-white rounded-xl px-4 py-2 font-medium">Send</button>
-          <button onClick={startMic} className="p-2 rounded-xl border"><Mic size={18} /></button>
-        </div>
-      </Card>
-    </div>
-  );
-}
-
-function simpleReply(text) {
-  const t = text.toLowerCase();
-  if (t.includes("price") || t.includes("daam")) return "Wheat avg ₹2100/q last month in Rajkot. Consider selling this week.";
-  if (t.includes("water") || t.includes("sichai") || t.includes("irrigation")) return "No watering today; humidity is high. Next irrigation in 2 days.";
-  if (t.includes("disease") || t.includes("patto par daag")) return "Upload a leaf photo in Crop Health to diagnose and get remedy steps.";
-  return "Here to help with crop health, irrigation, yield, and prices!";
-}
 
 function AuthDemo() {
   const [phone, setPhone] = useState("");
